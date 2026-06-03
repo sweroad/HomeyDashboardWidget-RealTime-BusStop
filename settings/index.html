@@ -147,54 +147,57 @@
     async function onHomeyReady(Homey) {
       const $debug = document.getElementById('debug');
 
-      // Use the _cf bridge directly (Homey.get/set/api don't exist in SDK v3)
+      // Proxy _unresolved so we can see WHICH id the native side calls back on
+      const realUnresolved = Homey._cf._unresolved;
+      Homey._cf._unresolved = new Proxy(realUnresolved, {
+        get(t, k) {
+          if (typeof t[k] === 'function') $debug.textContent += '\n← native called _unresolved[' + k + ']';
+          return t[k];
+        },
+        set(t, k, v) { t[k] = v; return true; },
+      });
+
+      // Signal ready FIRST — bridge may queue messages until ready
+      Homey.ready();
+
       function bridgeCall(event, ...args) {
         return new Promise((resolve, reject) => {
           const id = ++Homey._cf._callbackId;
           const timer = setTimeout(() => {
-            delete Homey._cf._unresolved[id];
-            reject(new Error('timeout — event "' + event + '" got no response'));
+            delete realUnresolved[id];
+            reject(new Error('timeout "' + event + '" id=' + id));
           }, 5000);
-          Homey._cf._unresolved[id] = (err, result) => {
+          realUnresolved[id] = (err, result) => {
             clearTimeout(timer);
-            delete Homey._cf._unresolved[id];
-            $debug.textContent += '\n← ' + event + ' cb: err=' + JSON.stringify(err) + ' result=' + JSON.stringify(result);
+            delete realUnresolved[id];
+            $debug.textContent += '\n  err=' + JSON.stringify(err) + ' result=' + JSON.stringify(result);
             if (err) reject(typeof err === 'string' ? new Error(err) : err);
             else resolve(result);
           };
-          $debug.textContent += '\n→ emit(' + event + ', ..., id=' + id + ')';
+          $debug.textContent += '\n→ emit(' + event + ' id=' + id + ')';
           Homey._cf.emit(event, ...args, id);
         });
       }
 
-      // Load saved key
+      // Try get
       try {
         const value = await bridgeCall('get', 'apiKey');
         if (value) $apiKey.value = value;
-      } catch (e) {
-        $debug.textContent += '\nload error: ' + e.message;
-      }
+      } catch (e) { $debug.textContent += '\nget failed: ' + e.message; }
 
       $save.addEventListener('click', async () => {
         const key = $apiKey.value.trim();
-        $save.disabled      = true;
-        $status.className   = '';
-        $status.textContent = 'Saving…';
-
+        $save.disabled = true; $status.className = ''; $status.textContent = 'Saving…';
         try {
           await bridgeCall('set', 'apiKey', key);
-          $status.className   = 'ok';
-          $status.textContent = key ? '✓ API key saved.' : '✓ API key cleared.';
+          $status.className = 'ok';
+          $status.textContent = key ? '✓ Saved.' : '✓ Cleared.';
           setTimeout(() => { $status.textContent = ''; }, 3000);
         } catch (err) {
-          $status.className   = 'err';
+          $status.className = 'err';
           $status.textContent = 'Error — ' + err.message;
-        } finally {
-          $save.disabled = false;
-        }
+        } finally { $save.disabled = false; }
       });
-
-      Homey.ready();
     }
   </script>
 </body>
