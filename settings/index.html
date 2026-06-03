@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bus Stop Settings</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 15px;
+      color: #1a1a1a;
+      background: #f5f5f5;
+      padding: 24px 16px;
+      max-width: 540px;
+    }
+
+    h2 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    p.description {
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    p.description a {
+      color: #1565C0;
+      text-decoration: none;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #444;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d0d0d0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: monospace;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus { border-color: #1565C0; }
+
+    .field-group {
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #777;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .show-toggle {
+      font-size: 12px;
+      color: #1565C0;
+      cursor: pointer;
+      user-select: none;
+      margin-top: 6px;
+      display: inline-block;
+    }
+
+    button {
+      background: #1565C0;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover  { background: #0d47a1; }
+    button:active { background: #0a3880; }
+    button:disabled { background: #9ab5d9; cursor: default; }
+
+    #status {
+      font-size: 13px;
+      margin-top: 12px;
+      min-height: 18px;
+    }
+    #status.ok  { color: #2e7d32; }
+    #status.err { color: #b71c1c; }
+  </style>
+</head>
+<body>
+
+  <h2>Trafiklab API Key</h2>
+  <p class="description">
+    A single key is used by all Bus Stop widgets on your dashboard.<br>
+    Get a free key at <a href="https://trafiklab.se" target="_blank">trafiklab.se</a> — create a project and add the
+    <strong>Trafiklab Realtime APIs</strong> product.
+  </p>
+
+  <div class="field-group">
+    <label for="apiKey">API Key</label>
+    <input type="password" id="apiKey" placeholder="Paste your key here…" autocomplete="off" spellcheck="false" />
+    <span class="show-toggle" id="showToggle">Show</span>
+    <p class="hint">
+      The key is stored securely on your Homey and is never sent to any server other than Trafiklab.
+    </p>
+  </div>
+
+  <button id="save">Save</button>
+  <p id="status"></p>
+
+  <script>
+    /* global HomeySettings */
+
+    const $apiKey     = document.getElementById('apiKey');
+    const $save       = document.getElementById('save');
+    const $status     = document.getElementById('status');
+    const $showToggle = document.getElementById('showToggle');
+
+    $showToggle.addEventListener('click', () => {
+      const isPassword = $apiKey.type === 'password';
+      $apiKey.type     = isPassword ? 'text' : 'password';
+      $showToggle.textContent = isPassword ? 'Hide' : 'Show';
+    });
+
+    function onHomeyReady(Homey) {
+      // Load saved key
+      Homey.get('apiKey', (err, value) => {
+        if (!err && value) $apiKey.value = value;
+      });
+
+      $save.addEventListener('click', () => {
+        const key = $apiKey.value.trim();
+        $save.disabled = true;
+        $status.className = '';
+        $status.textContent = 'Saving…';
+
+        Homey.set('apiKey', key, (err) => {
+          $save.disabled = false;
+          if (err) {
+            $status.className   = 'err';
+            $status.textContent = 'Error saving — please try again.';
+          } else {
+            $status.className   = 'ok';
+            $status.textContent = key ? '✓ API key saved.' : '✓ API key cleared.';
+            setTimeout(() => { $status.textContent = ''; }, 3000);
+          }
+        });
+      });
+
+      Homey.ready();
+    }
+  </script>
+</body>
+</html>

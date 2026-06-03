@@ -14,17 +14,21 @@ module.exports = [
     method: 'POST',
     path: '/',
     async fn({ homey, body }) {
-      const { stopId, apiKey, lines, count = 5 } = body ?? {};
+      const { stopId, lines, count = 5 } = body ?? {};
+      const apiKey = homey.settings.get('apiKey') ?? '';
 
-      if (!stopId || !apiKey) {
+      if (!stopId) {
         return { error: 'missing_config', departures: [], stopName: '' };
+      }
+      if (!apiKey) {
+        return { error: 'missing_key', departures: [], stopName: '' };
       }
 
       // Return cached response if still fresh (avoids duplicate API calls when
       // multiple widget instances show the same stop, or the widget polls faster
       // than Trafiklab refreshes its own cache).
       const cache    = homey.app._departuresCache;
-      const cacheKey = `${stopId}:${apiKey}`;
+      const cacheKey = stopId;
       const now      = Date.now();
 
       if (cache[cacheKey] && now - cache[cacheKey].fetchedAt < CACHE_TTL_MS) {

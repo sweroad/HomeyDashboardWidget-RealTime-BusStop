@@ -52,19 +52,6 @@
       "height": 320,
       "settings": [
         {
-          "id": "apiKey",
-          "type": "text",
-          "title": {
-            "en": "Trafiklab API Key",
-            "sv": "Trafiklab API-nyckel"
-          },
-          "hint": {
-            "en": "Get a free key at trafiklab.se — add the \"Trafiklab Realtime APIs\" product.",
-            "sv": "Hämta en gratis nyckel på trafiklab.se — lägg till produkten \"Trafiklab Realtime APIs\"."
-          },
-          "value": ""
-        },
-        {
           "id": "operator",
           "type": "dropdown",
           "title": {

@@ -77,6 +77,7 @@ function renderDepartures(data, preferredName) {
 function renderError(code) {
   const msgs = {
     missing_config: Homey.__('err_missing_config'),
+    missing_key:    Homey.__('err_missing_key'),
     network_error:  Homey.__('err_network'),
     api_401:        Homey.__('err_auth'),
   };
@@ -98,11 +99,10 @@ async function refresh() {
 
   const stopId    = settings.stopId   ?? '';
   const stopLabel = settings.stopName ?? '';
-  const apiKey    = settings.apiKey   ?? '';
   const lines     = settings.lines    ?? '';
   const count     = settings.count    ?? 5;
 
-  if (!stopId || !apiKey) {
+  if (!stopId) {
     $stopName.textContent = Homey.__('not_configured');
     $list.innerHTML = `<div id="empty">${Homey.__('err_missing_config')}</div>`;
     setStatus('', false);
@@ -110,7 +110,7 @@ async function refresh() {
   }
 
   try {
-    const data = await Homey.api('POST', '/', { stopId, stopLabel, apiKey, lines, count });
+    const data = await Homey.api('POST', '/', { stopId, stopLabel, lines, count });
 
     if (data.error) {
       // Keep last known departures visible but show error badge
