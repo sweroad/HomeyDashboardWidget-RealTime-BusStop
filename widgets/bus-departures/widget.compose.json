@@ -4,5 +4,11 @@
     "sv": "Busstavla"
   },
   "height": 320,
-  "settings": []
+  "settings": [],
+  "api": {
+    "getDepartures": {
+      "method": "GET",
+      "path": "/"
+    }
+  }
 }
