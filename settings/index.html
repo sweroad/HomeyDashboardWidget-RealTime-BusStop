@@ -146,12 +146,9 @@
 
     async function onHomeyReady(Homey) {
       // Dump debug info so we can see the URL and available Homey properties
-      const cfKeys = Homey._cf ? Object.keys(Homey._cf) : [];
-      const cfTypes = cfKeys.map(k => k + ': ' + typeof Homey._cf[k]).join(', ');
       document.getElementById('debug').textContent =
-        'href: ' + window.location.href + '\n' +
-        '_cf keys+types: ' + cfTypes + '\n' +
-        '_cf JSON: ' + JSON.stringify(Homey._cf);
+        'send: ' + String(Homey._cf.send).slice(0, 400) + '\n---\n' +
+        'emit: ' + String(Homey._cf.emit).slice(0, 400);
 
       const BASE = '/api/app/se.knowit.busstop';
 
