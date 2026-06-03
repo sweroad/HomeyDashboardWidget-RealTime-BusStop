@@ -1,0 +1,8 @@
+node_modules/
+.git/
+.github/
+.claude/
+env.json
+*.md
+.gitignore
+.homeyignore
