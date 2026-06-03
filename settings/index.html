@@ -139,29 +139,49 @@
       $showToggle.textContent = isPassword ? 'Hide' : 'Show';
     });
 
-    function onHomeyReady(Homey) {
-      // Load saved key via app REST API
-      Homey.api('GET', '/apiKey', null, (err, result) => {
-        if (!err && result?.value) $apiKey.value = result.value;
-      });
+    async function onHomeyReady(Homey) {
+      // The settings-page Homey object only has Homey.ready() in SDK v3.
+      // Use fetch() to talk to the app's REST API directly.
+      const BASE = '/api/app/se.knowit.busstop';
 
-      $save.addEventListener('click', () => {
+      async function apiGet(path) {
+        const r = await fetch(BASE + path);
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      }
+      async function apiPost(path, body) {
+        const r = await fetch(BASE + path, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(body),
+        });
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      }
+
+      // Load saved key
+      try {
+        const data = await apiGet('/apiKey');
+        if (data?.value) $apiKey.value = data.value;
+      } catch (_) { /* not yet saved — leave blank */ }
+
+      $save.addEventListener('click', async () => {
         const key = $apiKey.value.trim();
-        $save.disabled = true;
-        $status.className = '';
+        $save.disabled      = true;
+        $status.className   = '';
         $status.textContent = 'Saving…';
 
-        Homey.api('POST', '/apiKey', { value: key }, (err) => {
+        try {
+          await apiPost('/apiKey', { value: key });
+          $status.className   = 'ok';
+          $status.textContent = key ? '✓ API key saved.' : '✓ API key cleared.';
+          setTimeout(() => { $status.textContent = ''; }, 3000);
+        } catch (err) {
+          $status.className   = 'err';
+          $status.textContent = `Error (${err.message}) — please try again.`;
+        } finally {
           $save.disabled = false;
-          if (err) {
-            $status.className   = 'err';
-            $status.textContent = 'Error saving — please try again.';
-          } else {
-            $status.className   = 'ok';
-            $status.textContent = key ? '✓ API key saved.' : '✓ API key cleared.';
-            setTimeout(() => { $status.textContent = ''; }, 3000);
-          }
-        });
+        }
       });
 
       Homey.ready();
