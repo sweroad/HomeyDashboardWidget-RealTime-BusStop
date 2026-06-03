@@ -104,16 +104,30 @@
           ]
         },
         {
-          "id": "stop",
-          "type": "autocomplete",
+          "id": "stopId",
+          "type": "text",
           "title": {
-            "en": "Bus Stop",
-            "sv": "Hållplats"
+            "en": "Stop Area ID",
+            "sv": "Hållplats-ID"
           },
-          "placeholder": {
-            "en": "Search by name…",
-            "sv": "Sök hållplats…"
-          }
+          "hint": {
+            "en": "The numeric stop area ID from Trafiklab, e.g. 740012345. Find it at trafiklab.se or in the GTFS Sweden 3 areas.txt file.",
+            "sv": "Det numeriska hållplats-ID från Trafiklab, t.ex. 740012345. Finns på trafiklab.se eller i GTFS Sweden 3 areas.txt."
+          },
+          "value": ""
+        },
+        {
+          "id": "stopName",
+          "type": "text",
+          "title": {
+            "en": "Stop Display Name",
+            "sv": "Hållplatsnamn"
+          },
+          "hint": {
+            "en": "Shown as the widget header. Leave empty to use the name from Trafiklab.",
+            "sv": "Visas som rubrik i widgeten. Lämna tomt för att använda namnet från Trafiklab."
+          },
+          "value": ""
         },
         {
           "id": "lines",

@@ -41,10 +41,11 @@ function setStatus(text, visible = true) {
 
 // ─── Render ──────────────────────────────────────────────────────────────────
 
-function renderDepartures(data) {
+function renderDepartures(data, preferredName) {
   const { departures = [], stopName = '', updatedAt = null } = data;
 
-  if (stopName) $stopName.textContent = stopName;
+  const displayName = preferredName || stopName;
+  if (displayName) $stopName.textContent = displayName;
 
   if (!departures.length) {
     $list.innerHTML = `<div id="empty">${Homey.__('no_departures')}</div>`;
@@ -95,11 +96,11 @@ function escHtml(str) {
 async function refresh() {
   if (!settings) return;
 
-  const stopId    = typeof settings.stop === 'object' ? settings.stop?.id   : settings.stop;
-  const stopLabel = typeof settings.stop === 'object' ? settings.stop?.name : '';
-  const apiKey    = settings.apiKey;
-  const lines     = settings.lines;
-  const count     = settings.count ?? 5;
+  const stopId    = settings.stopId   ?? '';
+  const stopLabel = settings.stopName ?? '';
+  const apiKey    = settings.apiKey   ?? '';
+  const lines     = settings.lines    ?? '';
+  const count     = settings.count    ?? 5;
 
   if (!stopId || !apiKey) {
     $stopName.textContent = Homey.__('not_configured');
@@ -115,18 +116,18 @@ async function refresh() {
       // Keep last known departures visible but show error badge
       setStatus(Homey.__('err_offline'));
       if (lastDepartures) {
-        renderDepartures(lastDepartures);
+        renderDepartures(lastDepartures, stopLabel);
       } else {
         renderError(data.error);
       }
     } else {
       lastDepartures = data;
-      renderDepartures(data);
+      renderDepartures(data, stopLabel);
       setStatus('', false);
     }
   } catch (err) {
     setStatus(Homey.__('err_offline'));
-    if (lastDepartures) renderDepartures(lastDepartures);
+    if (lastDepartures) renderDepartures(lastDepartures, stopLabel);
   }
 }
 
