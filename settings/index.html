@@ -124,11 +124,7 @@
   <button id="save">Save</button>
   <p id="status"></p>
 
-  <details style="margin-top:20px">
-    <summary style="font-size:12px;color:#999;cursor:pointer">Debug info</summary>
-    <pre id="debug" style="font-size:11px;word-break:break-all;white-space:pre-wrap;background:#f0f0f0;padding:8px;border-radius:6px;margin-top:6px;color:#333"></pre>
-  </details>
-
+<script data-origin="settings"></script>
   <script src="/homey.js"></script>
   <script>
     /* global HomeySettings */
@@ -145,24 +141,32 @@
     });
 
     async function onHomeyReady(Homey) {
-      const $debug = document.getElementById('debug');
+      // Load saved key — Homey.get() is defined in /js/homey.settings.js
+      try {
+        const value = await Homey.get('apiKey');
+        if (value) $apiKey.value = value;
+      } catch (_) {}
+
+      $save.addEventListener('click', async () => {
+        const key = $apiKey.value.trim();
+        $save.disabled      = true;
+        $status.className   = '';
+        $status.textContent = 'Saving…';
+
+        try {
+          await Homey.set('apiKey', key);
+          $status.className   = 'ok';
+          $status.textContent = key ? '✓ API key saved.' : '✓ API key cleared.';
+          setTimeout(() => { $status.textContent = ''; }, 3000);
+        } catch (err) {
+          $status.className   = 'err';
+          $status.textContent = 'Error — ' + (err.message || err);
+        } finally {
+          $save.disabled = false;
+        }
+      });
 
       Homey.ready();
-
-      // Find and load the origin-specific homey.{origin}.js that defines Homey.get/set
-      const candidates = ['app', 'settings', 'apps', 'manager', 'app-settings'];
-      let originSrc = '';
-      for (const o of candidates) {
-        const r = await fetch('/js/homey.' + o + '.js');
-        $debug.textContent += o + ': ' + r.status + '\n';
-        if (r.ok) {
-          originSrc = await r.text();
-          $debug.textContent += '  → found! snippet: ' + originSrc.slice(0, 300) + '\n';
-          break;
-        }
-      }
-
-      $save.addEventListener('click', () => {});
     }
   </script>
 </body>
