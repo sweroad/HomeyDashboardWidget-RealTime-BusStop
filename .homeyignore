@@ -6,3 +6,4 @@ env.json
 *.md
 .gitignore
 .homeyignore
+package-lock.json
