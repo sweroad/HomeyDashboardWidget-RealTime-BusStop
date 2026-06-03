@@ -147,13 +147,19 @@
     async function onHomeyReady(Homey) {
       const $debug = document.getElementById('debug');
 
-      // Read the homey.js source to find the correct bridge event names
       Homey.ready();
-      try {
-        const src = await fetch('/homey.js').then(r => r.text());
-        $debug.textContent = src;
-      } catch(e) {
-        $debug.textContent = 'fetch /homey.js failed: ' + e.message;
+
+      // Find and load the origin-specific homey.{origin}.js that defines Homey.get/set
+      const candidates = ['app', 'settings', 'apps', 'manager', 'app-settings'];
+      let originSrc = '';
+      for (const o of candidates) {
+        const r = await fetch('/js/homey.' + o + '.js');
+        $debug.textContent += o + ': ' + r.status + '\n';
+        if (r.ok) {
+          originSrc = await r.text();
+          $debug.textContent += '  → found! snippet: ' + originSrc.slice(0, 300) + '\n';
+          break;
+        }
       }
 
       $save.addEventListener('click', () => {});
