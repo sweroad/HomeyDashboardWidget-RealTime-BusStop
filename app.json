@@ -43,6 +43,16 @@
     "email": "erik.engvall@knowit.se"
   },
   "permissions": [],
+  "api": [
+    {
+      "method": "GET",
+      "path": "/apiKey"
+    },
+    {
+      "method": "POST",
+      "path": "/apiKey"
+    }
+  ],
   "widgets": {
     "bus-departures": {
       "name": {

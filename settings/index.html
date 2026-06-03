@@ -140,9 +140,9 @@
     });
 
     function onHomeyReady(Homey) {
-      // Load saved key
-      Homey.get('apiKey', (err, value) => {
-        if (!err && value) $apiKey.value = value;
+      // Load saved key via app REST API
+      Homey.api('GET', '/apiKey', null, (err, result) => {
+        if (!err && result?.value) $apiKey.value = result.value;
       });
 
       $save.addEventListener('click', () => {
@@ -151,7 +151,7 @@
         $status.className = '';
         $status.textContent = 'Saving…';
 
-        Homey.set('apiKey', key, (err) => {
+        Homey.api('POST', '/apiKey', { value: key }, (err) => {
           $save.disabled = false;
           if (err) {
             $status.className   = 'err';

@@ -28,5 +28,9 @@
     "name": "Erik Engvall",
     "email": "erik.engvall@knowit.se"
   },
-  "permissions": []
+  "permissions": [],
+  "api": [
+    { "method": "GET",  "path": "/apiKey" },
+    { "method": "POST", "path": "/apiKey" }
+  ]
 }
