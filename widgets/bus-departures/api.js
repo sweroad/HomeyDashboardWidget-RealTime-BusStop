@@ -11,11 +11,13 @@ module.exports = [
    * Body: { stopId, apiKey, lines, count }
    */
   {
-    method: 'POST',
+    method: 'GET',
     path: '/',
-    async fn({ homey, body }) {
-      const { stopId, lines, count = 5 } = body ?? {};
-      const apiKey = homey.settings.get('apiKey') ?? '';
+    async fn({ homey }) {
+      const apiKey  = homey.settings.get('apiKey')   ?? '';
+      const stopId  = homey.settings.get('stopId')   ?? '';
+      const lines   = homey.settings.get('lines')    ?? '';
+      const count   = homey.settings.get('count')    || 5;
 
       if (!stopId) {
         return { error: 'missing_config', departures: [], stopName: '' };

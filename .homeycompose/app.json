@@ -30,6 +30,8 @@
   },
   "permissions": [],
   "api": [
+    { "method": "GET",  "path": "/settings" },
+    { "method": "POST", "path": "/settings" },
     { "method": "GET",  "path": "/apiKey" },
     { "method": "POST", "path": "/apiKey" }
   ]

@@ -46,6 +46,14 @@
   "api": [
     {
       "method": "GET",
+      "path": "/settings"
+    },
+    {
+      "method": "POST",
+      "path": "/settings"
+    },
+    {
+      "method": "GET",
       "path": "/apiKey"
     },
     {
@@ -60,97 +68,7 @@
         "sv": "Busstavla"
       },
       "height": 320,
-      "settings": [
-        {
-          "id": "operator",
-          "type": "dropdown",
-          "title": {
-            "en": "Operator",
-            "sv": "Operatör"
-          },
-          "value": "jlt",
-          "options": [
-            {
-              "id": "jlt",
-              "title": {
-                "en": "JLT – Jönköpings Länstrafik",
-                "sv": "JLT – Jönköpings Länstrafik"
-              }
-            },
-            {
-              "id": "sl",
-              "title": {
-                "en": "SL – Storstockholms Lokaltrafik",
-                "sv": "SL – Storstockholms Lokaltrafik"
-              }
-            },
-            {
-              "id": "skane",
-              "title": {
-                "en": "Skånetrafiken",
-                "sv": "Skånetrafiken"
-              }
-            },
-            {
-              "id": "vt",
-              "title": {
-                "en": "Västtrafik",
-                "sv": "Västtrafik"
-              }
-            }
-          ]
-        },
-        {
-          "id": "stopId",
-          "type": "text",
-          "title": {
-            "en": "Stop Area ID",
-            "sv": "Hållplats-ID"
-          },
-          "hint": {
-            "en": "The numeric stop area ID from Trafiklab, e.g. 740012345. Find it at trafiklab.se or in the GTFS Sweden 3 areas.txt file.",
-            "sv": "Det numeriska hållplats-ID från Trafiklab, t.ex. 740012345. Finns på trafiklab.se eller i GTFS Sweden 3 areas.txt."
-          },
-          "value": ""
-        },
-        {
-          "id": "stopName",
-          "type": "text",
-          "title": {
-            "en": "Stop Display Name",
-            "sv": "Hållplatsnamn"
-          },
-          "hint": {
-            "en": "Shown as the widget header. Leave empty to use the name from Trafiklab.",
-            "sv": "Visas som rubrik i widgeten. Lämna tomt för att använda namnet från Trafiklab."
-          },
-          "value": ""
-        },
-        {
-          "id": "lines",
-          "type": "text",
-          "title": {
-            "en": "Filter Lines (optional)",
-            "sv": "Filtrera linjer (valfritt)"
-          },
-          "hint": {
-            "en": "Comma-separated line numbers, e.g. 1,4,12. Leave empty to show all.",
-            "sv": "Kommaseparerade linjenummer, t.ex. 1,4,12. Lämna tomt för alla."
-          },
-          "value": ""
-        },
-        {
-          "id": "count",
-          "type": "number",
-          "title": {
-            "en": "Number of Departures",
-            "sv": "Antal avgångar"
-          },
-          "value": 5,
-          "min": 1,
-          "max": 10
-        }
-      ],
+      "settings": [],
       "id": "bus-departures"
     }
   }

@@ -10,7 +10,6 @@ const $footer      = document.getElementById('footer');
 
 // ─── State ───────────────────────────────────────────────────────────────────
 let lastDepartures = null;
-let settings       = null;
 let refreshTimer   = null;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -41,11 +40,10 @@ function setStatus(text, visible = true) {
 
 // ─── Render ──────────────────────────────────────────────────────────────────
 
-function renderDepartures(data, preferredName) {
+function renderDepartures(data) {
   const { departures = [], stopName = '', updatedAt = null } = data;
 
-  const displayName = preferredName || stopName;
-  if (displayName) $stopName.textContent = displayName;
+  if (stopName) $stopName.textContent = stopName;
 
   if (!departures.length) {
     $list.innerHTML = `<div id="empty">${Homey.__('no_departures')}</div>`;
@@ -95,50 +93,32 @@ function escHtml(str) {
 // ─── Data fetching ───────────────────────────────────────────────────────────
 
 async function refresh() {
-  if (!settings) return;
-
-  const stopId    = settings.stopId   ?? '';
-  const stopLabel = settings.stopName ?? '';
-  const lines     = settings.lines    ?? '';
-  const count     = settings.count    ?? 5;
-
-  if (!stopId) {
-    $stopName.textContent = Homey.__('not_configured');
-    $list.innerHTML = `<div id="empty">${Homey.__('err_missing_config')}</div>`;
-    setStatus('', false);
-    return;
-  }
-
   try {
-    const data = await Homey.api('POST', '/', { stopId, stopLabel, lines, count });
+    const data = await Homey.api('GET', '/');
 
     if (data.error) {
       // Keep last known departures visible but show error badge
       setStatus(Homey.__('err_offline'));
       if (lastDepartures) {
-        renderDepartures(lastDepartures, stopLabel);
+        renderDepartures(lastDepartures);
       } else {
         renderError(data.error);
       }
     } else {
       lastDepartures = data;
-      renderDepartures(data, stopLabel);
+      renderDepartures(data);
       setStatus('', false);
     }
   } catch (err) {
     setStatus(Homey.__('err_offline'));
-    if (lastDepartures) renderDepartures(lastDepartures, stopLabel);
+    if (lastDepartures) renderDepartures(lastDepartures);
   }
 }
 
 // ─── Entry point ─────────────────────────────────────────────────────────────
 
 async function onHomeyReady(Homey) { // eslint-disable-line no-unused-vars
-  settings = await Homey.getSettings();
-
-  // Refresh immediately, then on a 30-second interval
   await refresh();
   refreshTimer = setInterval(refresh, 60 * 1000);
-
   Homey.ready();
 }
