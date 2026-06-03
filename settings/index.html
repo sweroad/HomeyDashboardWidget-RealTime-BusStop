@@ -148,23 +148,24 @@
       // Dump debug info so we can see the URL and available Homey properties
       document.getElementById('debug').textContent =
         'href: ' + window.location.href + '\n' +
-        'origin: ' + window.location.origin + '\n' +
         'Homey keys: ' + Object.keys(Homey).sort().join(', ') + '\n' +
-        'Homey.token: ' + (Homey.token ?? '(undefined)') + '\n' +
-        'Homey.localUrl: ' + (Homey.localUrl ?? '(undefined)');
+        '_origin: ' + Homey._origin + '\n' +
+        '_cf type: ' + typeof Homey._cf + '\n' +
+        '_cf value: ' + (typeof Homey._cf === 'function' ? '[function]' : String(Homey._cf));
 
       const BASE = '/api/app/se.knowit.busstop';
 
       async function apiGet(path) {
-        const r = await fetch(BASE + path);
+        const r = await fetch(BASE + path, { credentials: 'include' });
         if (!r.ok) throw new Error(r.status);
         return r.json();
       }
       async function apiPost(path, body) {
         const r = await fetch(BASE + path, {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify(body),
+          method:      'POST',
+          credentials: 'include',
+          headers:     { 'Content-Type': 'application/json' },
+          body:        JSON.stringify(body),
         });
         if (!r.ok) throw new Error(r.status);
         return r.json();
