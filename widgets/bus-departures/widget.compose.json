@@ -1,0 +1,79 @@
+{
+  "name": {
+    "en": "Bus Departures",
+    "sv": "Busstavla"
+  },
+  "height": 320,
+  "settings": [
+    {
+      "id": "apiKey",
+      "type": "text",
+      "title": {
+        "en": "Trafiklab API Key",
+        "sv": "Trafiklab API-nyckel"
+      },
+      "hint": {
+        "en": "Get a free key at trafiklab.se — add the \"Trafiklab Realtime APIs\" product.",
+        "sv": "Hämta en gratis nyckel på trafiklab.se — lägg till produkten \"Trafiklab Realtime APIs\"."
+      },
+      "value": ""
+    },
+    {
+      "id": "operator",
+      "type": "dropdown",
+      "title": {
+        "en": "Operator",
+        "sv": "Operatör"
+      },
+      "value": "jlt",
+      "options": [
+        { "id": "jlt", "title": { "en": "JLT – Jönköpings Länstrafik", "sv": "JLT – Jönköpings Länstrafik" } },
+        { "id": "sl",  "title": { "en": "SL – Storstockholms Lokaltrafik", "sv": "SL – Storstockholms Lokaltrafik" } },
+        { "id": "skane", "title": { "en": "Skånetrafiken", "sv": "Skånetrafiken" } },
+        { "id": "vt",  "title": { "en": "Västtrafik", "sv": "Västtrafik" } }
+      ]
+    },
+    {
+      "id": "stop",
+      "type": "autocomplete",
+      "title": {
+        "en": "Bus Stop",
+        "sv": "Hållplats"
+      },
+      "placeholder": {
+        "en": "Search by name…",
+        "sv": "Sök hållplats…"
+      }
+    },
+    {
+      "id": "lines",
+      "type": "text",
+      "title": {
+        "en": "Filter Lines (optional)",
+        "sv": "Filtrera linjer (valfritt)"
+      },
+      "hint": {
+        "en": "Comma-separated line numbers, e.g. 1,4,12. Leave empty to show all.",
+        "sv": "Kommaseparerade linjenummer, t.ex. 1,4,12. Lämna tomt för alla."
+      },
+      "value": ""
+    },
+    {
+      "id": "count",
+      "type": "number",
+      "title": {
+        "en": "Number of Departures",
+        "sv": "Antal avgångar"
+      },
+      "value": 5,
+      "min": 1,
+      "max": 10
+    }
+  ],
+  "api": {
+    "getDepartures": {
+      "method": "POST",
+      "path": "/"
+    }
+  }
+}

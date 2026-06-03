@@ -1,0 +1,12 @@
+{
+  "no_departures":    "Inga avgångar kommande timme",
+  "not_configured":   "Busshållplats",
+  "cancelled":        "Inställd",
+  "updated_at":       "Uppdaterad {time}",
+
+  "err_missing_config": "Öppna widgetinställningarna och ange hållplats och API-nyckel",
+  "err_network":        "Nätverksfel — kontrollera din anslutning",
+  "err_auth":           "Ogiltig API-nyckel — kontrollera din Trafiklab-nyckel",
+  "err_generic":        "Fel ({code}) — försök igen senare",
+  "err_offline":        "Offline"
+}

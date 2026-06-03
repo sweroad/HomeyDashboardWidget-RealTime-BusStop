@@ -1,0 +1,12 @@
+{
+  "no_departures":    "No departures in the next hour",
+  "not_configured":   "Bus Stop",
+  "cancelled":        "Cancelled",
+  "updated_at":       "Updated {time}",
+
+  "err_missing_config": "Open widget settings to configure a stop and API key",
+  "err_network":        "Network error — check your connection",
+  "err_auth":           "Invalid API key — check your Trafiklab key",
+  "err_generic":        "Error ({code}) — try again later",
+  "err_offline":        "Offline"
+}

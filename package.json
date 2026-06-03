@@ -1,0 +1,14 @@
+{
+  "name": "se.knowit.busstop",
+  "version": "1.0.0",
+  "main": "app.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "validate": "homey app validate"
+  },
+  "dependencies": {
+    "homey": "*"
+  }
+}
