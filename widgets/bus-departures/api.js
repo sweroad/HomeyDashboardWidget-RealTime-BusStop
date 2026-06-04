@@ -29,11 +29,12 @@ module.exports = {
   async getDepartures({ homey }) {
     homey.log('getDepartures called');
 
-    const settings = homey.app.homey.settings;
-    const apiKey   = settings.get('apiKey')  ?? '';
-    const stopId   = settings.get('stopId')  ?? '';
-    const lines    = settings.get('lines')   ?? '';
-    const count    = settings.get('count')   || 5;
+    const settings             = homey.app.homey.settings;
+    const apiKey               = settings.get('apiKey')              ?? '';
+    const stopId               = settings.get('stopId')              ?? '';
+    const lines                = settings.get('lines')               ?? '';
+    const excludeDestinations  = settings.get('excludeDestinations') ?? '';
+    const count                = settings.get('count')               || 5;
 
     homey.log('stopId:', stopId, '— apiKey len:', apiKey.length);
 
@@ -46,7 +47,7 @@ module.exports = {
 
     if (cache[cacheKey] && now - cache[cacheKey].fetchedAt < CACHE_TTL_MS) {
       homey.log('serving from cache');
-      return applyFilters(cache[cacheKey].data, lines, count);
+      return applyFilters(cache[cacheKey].data, lines, excludeDestinations, count);
     }
 
     let res;
@@ -55,13 +56,13 @@ module.exports = {
       res = await httpsGet(url);
     } catch (err) {
       homey.error('fetch error:', err.message);
-      if (cache[cacheKey]) return applyFilters(cache[cacheKey].data, lines, count);
+      if (cache[cacheKey]) return applyFilters(cache[cacheKey].data, lines, excludeDestinations, count);
       return { error: 'network_error', departures: [], stopName: '' };
     }
 
     if (!res.ok) {
       homey.error('api error:', res.status);
-      if (cache[cacheKey]) return applyFilters(cache[cacheKey].data, lines, count);
+      if (cache[cacheKey]) return applyFilters(cache[cacheKey].data, lines, excludeDestinations, count);
       return { error: `api_${res.status}`, departures: [], stopName: '' };
     }
 
@@ -83,16 +84,25 @@ module.exports = {
 
     cache[cacheKey] = { data, fetchedAt: now };
     homey.log('fetched', data.departures.length, 'departures for', data.stopName);
-    return applyFilters(data, lines, count);
+    return applyFilters(data, lines, excludeDestinations, count);
   },
 
 };
 
-function applyFilters(data, lines, count) {
+function applyFilters(data, lines, excludeDestinations, count) {
   let departures = data.departures;
+
   if (lines) {
     const wanted = lines.split(',').map(l => l.trim()).filter(Boolean);
     if (wanted.length) departures = departures.filter(d => wanted.includes(d.line));
   }
+
+  if (excludeDestinations) {
+    const excluded = excludeDestinations.split(',').map(d => d.trim().toLowerCase()).filter(Boolean);
+    if (excluded.length) {
+      departures = departures.filter(d => !excluded.includes(d.destination.toLowerCase()));
+    }
+  }
+
   return { ...data, departures: departures.slice(0, Number(count)) };
 }

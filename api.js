@@ -4,7 +4,7 @@
 // All endpoints are public: true so the settings page webview can call them
 // without a bearer token.
 
-const SETTINGS_KEYS = ['apiKey', 'stopId', 'stopName', 'operator', 'lines', 'count'];
+const SETTINGS_KEYS = ['apiKey', 'stopId', 'stopName', 'operator', 'lines', 'excludeDestinations', 'count'];
 
 module.exports = [
   {

@@ -74,9 +74,15 @@
   </div>
 
   <div class="field-group">
+    <label for="excludeDestinations">Exclude Destinations (optional)</label>
+    <input type="text" id="excludeDestinations" placeholder="e.g. Vätterslund, Huskvarna" />
+    <p class="hint">Comma-separated destination names to hide from the board.</p>
+  </div>
+
+  <div class="field-group">
     <label for="count">Number of Departures</label>
     <input type="text" id="count" placeholder="5" />
-    <p class="hint">How many upcoming departures to show (1–10).</p>
+    <p class="hint">How many upcoming departures to show (1–10), after filters are applied.</p>
   </div>
 
   <button id="save">Save</button>
@@ -91,6 +97,7 @@
     const $operator   = document.getElementById('operator');
     const $lines      = document.getElementById('lines');
     const $count      = document.getElementById('count');
+    const $excludeDestinations = document.getElementById('excludeDestinations');
     const $save       = document.getElementById('save');
     const $status     = document.getElementById('status');
     const $showToggle = document.getElementById('showToggle');
@@ -104,24 +111,26 @@
     async function onHomeyReady(Homey) {
       // Load all saved settings via Homey.get() (from homey.settings.js)
       try {
-        $apiKey.value   = (await Homey.get('apiKey'))   || '';
-        $stopId.value   = (await Homey.get('stopId'))   || '';
-        $stopName.value = (await Homey.get('stopName')) || '';
-        $operator.value = (await Homey.get('operator')) || 'jlt';
-        $lines.value    = (await Homey.get('lines'))    || '';
-        $count.value    = (await Homey.get('count'))    || '5';
+        $apiKey.value              = (await Homey.get('apiKey'))              || '';
+        $stopId.value              = (await Homey.get('stopId'))              || '';
+        $stopName.value            = (await Homey.get('stopName'))            || '';
+        $operator.value            = (await Homey.get('operator'))            || 'jlt';
+        $lines.value               = (await Homey.get('lines'))               || '';
+        $excludeDestinations.value = (await Homey.get('excludeDestinations')) || '';
+        $count.value               = (await Homey.get('count'))               || '5';
       } catch (_) {}
 
       $save.addEventListener('click', async () => {
         $save.disabled = true;
         $status.className = ''; $status.textContent = 'Saving…';
         try {
-          await Homey.set('apiKey',   $apiKey.value.trim());
-          await Homey.set('stopId',   $stopId.value.trim());
-          await Homey.set('stopName', $stopName.value.trim());
-          await Homey.set('operator', $operator.value);
-          await Homey.set('lines',    $lines.value.trim());
-          await Homey.set('count',    $count.value.trim() || '5');
+          await Homey.set('apiKey',              $apiKey.value.trim());
+          await Homey.set('stopId',              $stopId.value.trim());
+          await Homey.set('stopName',            $stopName.value.trim());
+          await Homey.set('operator',            $operator.value);
+          await Homey.set('lines',               $lines.value.trim());
+          await Homey.set('excludeDestinations', $excludeDestinations.value.trim());
+          await Homey.set('count',               $count.value.trim() || '5');
           $status.className = 'ok'; $status.textContent = '✓ Settings saved.';
           setTimeout(() => { $status.textContent = ''; }, 3000);
         } catch (err) {
