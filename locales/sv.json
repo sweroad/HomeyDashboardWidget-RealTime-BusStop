@@ -2,7 +2,7 @@
   "no_departures":    "Inga avgångar kommande timme",
   "not_configured":   "Busshållplats",
   "cancelled":        "Inställd",
-  "updated_at":       "Uppdaterad {time}",
+  "updated_at":       "Uppdaterad __time__",
 
   "err_missing_config": "Öppna widgetinställningarna och ange ett hållplats-ID",
   "err_missing_key": "Öppna appinställningarna och lägg till din Trafiklab API-nyckel",

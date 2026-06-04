@@ -2,7 +2,7 @@
   "no_departures":    "No departures in the next hour",
   "not_configured":   "Bus Stop",
   "cancelled":        "Cancelled",
-  "updated_at":       "Updated {time}",
+  "updated_at":       "Updated __time__",
 
   "err_missing_config": "Open widget settings and enter a Stop Area ID",
   "err_missing_key": "Open the app settings to add your Trafiklab API key",

@@ -9,27 +9,18 @@
 
     :root {
       --color-bg:        transparent;
-      --color-text:      #1a1a1a;
-      --color-subtext:   #666;
+      --color-text:      var(--homey-text-color, #ffffff);
+      --color-subtext:   var(--homey-text-color-secondary, rgba(255,255,255,0.55));
       --color-line-bg:   #1565C0;
       --color-line-text: #fff;
-      --color-delay-ok:  #2e7d32;
-      --color-delay-warn:#e65100;
-      --color-delay-bad: #b71c1c;
-      --color-cancelled: #b71c1c;
-      --color-divider:   rgba(0,0,0,0.08);
-      --color-badge-bg:  rgba(0,0,0,0.06);
+      --color-delay-ok:  #4caf50;
+      --color-delay-warn:#ff9800;
+      --color-delay-bad: #f44336;
+      --color-cancelled: #f44336;
+      --color-divider:   rgba(255,255,255,0.10);
+      --color-badge-bg:  rgba(255,255,255,0.10);
       --row-height:      48px;
       --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --color-text:     #f0f0f0;
-        --color-subtext:  #999;
-        --color-divider:  rgba(255,255,255,0.08);
-        --color-badge-bg: rgba(255,255,255,0.08);
-      }
     }
 
     body {
