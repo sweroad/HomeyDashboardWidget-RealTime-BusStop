@@ -93,8 +93,17 @@ function escHtml(str) {
 // ─── Data fetching ───────────────────────────────────────────────────────────
 
 async function refresh() {
+  let settings = {};
+  try { settings = await Homey.getSettings(); } catch (_) {}
+
   try {
-    const data = await Homey.api('GET', '/', {});
+    const data = await Homey.api('POST', '/', {
+      stopId:              settings.stopId              ?? '',
+      stopName:            settings.stopName            ?? '',
+      lines:               settings.lines               ?? '',
+      excludeDestinations: settings.excludeDestinations ?? '',
+      count:               settings.count               ?? 5,
+    });
 
     if (data.error) {
       // Keep last known departures visible but show error badge

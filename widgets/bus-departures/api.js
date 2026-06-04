@@ -22,21 +22,18 @@ function httpsGet(url) {
   });
 }
 
-// Widget API handlers — keys must match widget.compose.json's "api" declarations.
-// Homey routes Homey.api('GET', '/') → getDepartures based on method+path.
 module.exports = {
 
-  async getDepartures({ homey }) {
-    homey.log('getDepartures called');
+  async getDepartures({ homey, body }) {
+    // API key stays in app settings (shared across all widget instances)
+    const apiKey = homey.app.homey.settings.get('apiKey') ?? '';
 
-    const settings             = homey.app.homey.settings;
-    const apiKey               = settings.get('apiKey')              ?? '';
-    const stopId               = settings.get('stopId')              ?? '';
-    const lines                = settings.get('lines')               ?? '';
-    const excludeDestinations  = settings.get('excludeDestinations') ?? '';
-    const count                = settings.get('count')               || 5;
-
-    homey.log('stopId:', stopId, '— apiKey len:', apiKey.length);
+    // All other config comes from the widget's own settings (per instance)
+    const stopId              = body?.stopId              ?? '';
+    const stopName            = body?.stopName            ?? '';
+    const lines               = body?.lines               ?? '';
+    const excludeDestinations = body?.excludeDestinations ?? '';
+    const count               = body?.count               || 5;
 
     if (!stopId) return { error: 'missing_config', departures: [], stopName: '' };
     if (!apiKey) return { error: 'missing_key',    departures: [], stopName: '' };
@@ -46,8 +43,7 @@ module.exports = {
     const now      = Date.now();
 
     if (cache[cacheKey] && now - cache[cacheKey].fetchedAt < CACHE_TTL_MS) {
-      homey.log('serving from cache');
-      return applyFilters(cache[cacheKey].data, lines, excludeDestinations, count);
+      return applyFilters(cache[cacheKey].data, stopName, lines, excludeDestinations, count);
     }
 
     let res;
@@ -56,17 +52,17 @@ module.exports = {
       res = await httpsGet(url);
     } catch (err) {
       homey.error('fetch error:', err.message);
-      if (cache[cacheKey]) return applyFilters(cache[cacheKey].data, lines, excludeDestinations, count);
+      if (cache[cacheKey]) return applyFilters(cache[cacheKey].data, stopName, lines, excludeDestinations, count);
       return { error: 'network_error', departures: [], stopName: '' };
     }
 
     if (!res.ok) {
       homey.error('api error:', res.status);
-      if (cache[cacheKey]) return applyFilters(cache[cacheKey].data, lines, excludeDestinations, count);
+      if (cache[cacheKey]) return applyFilters(cache[cacheKey].data, stopName, lines, excludeDestinations, count);
       return { error: `api_${res.status}`, departures: [], stopName: '' };
     }
 
-    const raw = res.json();
+    const raw  = res.json();
     const data = {
       stopName:   raw.stops?.[0]?.name ?? stopId,
       updatedAt:  raw.timestamp        ?? new Date().toISOString(),
@@ -83,13 +79,12 @@ module.exports = {
     };
 
     cache[cacheKey] = { data, fetchedAt: now };
-    homey.log('fetched', data.departures.length, 'departures for', data.stopName);
-    return applyFilters(data, lines, excludeDestinations, count);
+    return applyFilters(data, stopName, lines, excludeDestinations, count);
   },
 
 };
 
-function applyFilters(data, lines, excludeDestinations, count) {
+function applyFilters(data, stopNameOverride, lines, excludeDestinations, count) {
   let departures = data.departures;
 
   if (lines) {
@@ -99,10 +94,12 @@ function applyFilters(data, lines, excludeDestinations, count) {
 
   if (excludeDestinations) {
     const excluded = excludeDestinations.split(',').map(d => d.trim().toLowerCase()).filter(Boolean);
-    if (excluded.length) {
-      departures = departures.filter(d => !excluded.includes(d.destination.toLowerCase()));
-    }
+    if (excluded.length) departures = departures.filter(d => !excluded.includes(d.destination.toLowerCase()));
   }
 
-  return { ...data, departures: departures.slice(0, Number(count)) };
+  return {
+    ...data,
+    stopName:   stopNameOverride || data.stopName,
+    departures: departures.slice(0, Number(count)),
+  };
 }

@@ -15,16 +15,16 @@
     p.description { font-size: 13px; color: #555; margin-bottom: 20px; line-height: 1.5; }
     p.description a { color: #1565C0; text-decoration: none; }
     label { display: block; font-size: 13px; font-weight: 500; color: #444; margin-bottom: 6px; }
-    input[type="text"], input[type="password"], select {
+    input[type="text"], input[type="password"] {
       width: 100%; padding: 10px 12px; border: 1px solid #d0d0d0; border-radius: 8px;
-      font-size: 14px; background: #fff; outline: none; transition: border-color 0.15s;
-      appearance: none; -webkit-appearance: none;
+      font-size: 14px; font-family: monospace; background: #fff; outline: none;
+      transition: border-color 0.15s;
     }
-    input:focus, select:focus { border-color: #1565C0; }
-    .field-group { background: #fff; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    input:focus { border-color: #1565C0; }
+    .field-group { background: #fff; border-radius: 10px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
     .hint { font-size: 12px; color: #777; margin-top: 6px; line-height: 1.4; }
     .show-toggle { font-size: 12px; color: #1565C0; cursor: pointer; user-select: none; margin-top: 6px; display: inline-block; }
-    button { background: #1565C0; color: #fff; border: none; border-radius: 8px; padding: 11px 24px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+    button { background: #1565C0; color: #fff; border: none; border-radius: 8px; padding: 11px 24px; font-size: 15px; font-weight: 600; cursor: pointer; }
     button:disabled { background: #9ab5d9; }
     #status { font-size: 13px; margin-top: 12px; min-height: 18px; }
     #status.ok  { color: #2e7d32; }
@@ -33,56 +33,17 @@
 </head>
 <body>
 
-  <h2>Bus Stop Settings</h2>
+  <h2>Trafiklab API Key</h2>
   <p class="description">
-    Configure your bus stop here. All widgets on the dashboard share these settings.<br>
-    Get a free API key at <a href="https://trafiklab.se" target="_blank">trafiklab.se</a> — add the <strong>Trafiklab Realtime APIs</strong> product.
+    One key is shared by all Bus Stop widgets. Stop, filters and count are configured per widget.<br>
+    Get a free key at <a href="https://trafiklab.se" target="_blank">trafiklab.se</a> — add the <strong>Trafiklab Realtime APIs</strong> product.
   </p>
 
   <div class="field-group">
-    <label for="apiKey">Trafiklab API Key</label>
+    <label for="apiKey">API Key</label>
     <input type="password" id="apiKey" placeholder="Paste your key here…" autocomplete="off" spellcheck="false" />
     <span class="show-toggle" id="showToggle">Show</span>
-  </div>
-
-  <div class="field-group">
-    <label for="stopId">Stop Area ID</label>
-    <input type="text" id="stopId" placeholder="e.g. 740012345" autocomplete="off" />
-    <p class="hint">Find your stop ID at <a href="https://trafiklab.se" target="_blank">trafiklab.se</a> or in the GTFS Sweden 3 areas.txt file.</p>
-  </div>
-
-  <div class="field-group">
-    <label for="stopName">Stop Display Name (optional)</label>
-    <input type="text" id="stopName" placeholder="e.g. Jönköping C" />
-    <p class="hint">Shown as the widget header. Leave empty to use the name from Trafiklab.</p>
-  </div>
-
-  <div class="field-group">
-    <label for="operator">Operator</label>
-    <select id="operator">
-      <option value="jlt">JLT – Jönköpings Länstrafik</option>
-      <option value="sl">SL – Storstockholms Lokaltrafik</option>
-      <option value="skane">Skånetrafiken</option>
-      <option value="vt">Västtrafik</option>
-    </select>
-  </div>
-
-  <div class="field-group">
-    <label for="lines">Filter Lines (optional)</label>
-    <input type="text" id="lines" placeholder="e.g. 1,4,12" />
-    <p class="hint">Comma-separated line numbers. Leave empty to show all lines.</p>
-  </div>
-
-  <div class="field-group">
-    <label for="excludeDestinations">Exclude Destinations (optional)</label>
-    <input type="text" id="excludeDestinations" placeholder="e.g. Vätterslund, Huskvarna" />
-    <p class="hint">Comma-separated destination names to hide from the board.</p>
-  </div>
-
-  <div class="field-group">
-    <label for="count">Number of Departures</label>
-    <input type="text" id="count" placeholder="5" />
-    <p class="hint">How many upcoming departures to show (1–10), after filters are applied.</p>
+    <p class="hint">Stored securely on your Homey, never sent anywhere except Trafiklab.</p>
   </div>
 
   <button id="save">Save</button>
@@ -92,12 +53,6 @@
   <script src="/homey.js"></script>
   <script>
     const $apiKey     = document.getElementById('apiKey');
-    const $stopId     = document.getElementById('stopId');
-    const $stopName   = document.getElementById('stopName');
-    const $operator   = document.getElementById('operator');
-    const $lines      = document.getElementById('lines');
-    const $count      = document.getElementById('count');
-    const $excludeDestinations = document.getElementById('excludeDestinations');
     const $save       = document.getElementById('save');
     const $status     = document.getElementById('status');
     const $showToggle = document.getElementById('showToggle');
@@ -109,29 +64,14 @@
     });
 
     async function onHomeyReady(Homey) {
-      // Load all saved settings via Homey.get() (from homey.settings.js)
-      try {
-        $apiKey.value              = (await Homey.get('apiKey'))              || '';
-        $stopId.value              = (await Homey.get('stopId'))              || '';
-        $stopName.value            = (await Homey.get('stopName'))            || '';
-        $operator.value            = (await Homey.get('operator'))            || 'jlt';
-        $lines.value               = (await Homey.get('lines'))               || '';
-        $excludeDestinations.value = (await Homey.get('excludeDestinations')) || '';
-        $count.value               = (await Homey.get('count'))               || '5';
-      } catch (_) {}
+      try { $apiKey.value = (await Homey.get('apiKey')) || ''; } catch (_) {}
 
       $save.addEventListener('click', async () => {
         $save.disabled = true;
         $status.className = ''; $status.textContent = 'Saving…';
         try {
-          await Homey.set('apiKey',              $apiKey.value.trim());
-          await Homey.set('stopId',              $stopId.value.trim());
-          await Homey.set('stopName',            $stopName.value.trim());
-          await Homey.set('operator',            $operator.value);
-          await Homey.set('lines',               $lines.value.trim());
-          await Homey.set('excludeDestinations', $excludeDestinations.value.trim());
-          await Homey.set('count',               $count.value.trim() || '5');
-          $status.className = 'ok'; $status.textContent = '✓ Settings saved.';
+          await Homey.set('apiKey', $apiKey.value.trim());
+          $status.className = 'ok'; $status.textContent = '✓ API key saved.';
           setTimeout(() => { $status.textContent = ''; }, 3000);
         } catch (err) {
           $status.className = 'err'; $status.textContent = 'Error — ' + (err.message || err);

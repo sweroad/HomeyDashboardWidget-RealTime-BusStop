@@ -77,15 +77,65 @@
             "sv": "Hållplats-ID"
           },
           "hint": {
-            "en": "Override the stop from app settings. Leave empty to use the app-level stop.",
-            "sv": "Åsidosätt hållplatsen från appinställningarna. Lämna tomt för att använda appens hållplats."
+            "en": "Numeric stop area ID from Trafiklab, e.g. 740039413",
+            "sv": "Numeriskt hållplats-ID från Trafiklab, t.ex. 740039413"
           },
           "value": ""
+        },
+        {
+          "id": "stopName",
+          "type": "text",
+          "title": {
+            "en": "Stop Display Name (optional)",
+            "sv": "Hållplatsnamn (valfritt)"
+          },
+          "hint": {
+            "en": "Widget header. Leave empty to use the name from Trafiklab.",
+            "sv": "Widgetens rubrik. Lämna tomt för att använda namnet från Trafiklab."
+          },
+          "value": ""
+        },
+        {
+          "id": "lines",
+          "type": "text",
+          "title": {
+            "en": "Filter Lines (optional)",
+            "sv": "Filtrera linjer (valfritt)"
+          },
+          "hint": {
+            "en": "Comma-separated line numbers, e.g. 1,4,12",
+            "sv": "Kommaseparerade linjenummer, t.ex. 1,4,12"
+          },
+          "value": ""
+        },
+        {
+          "id": "excludeDestinations",
+          "type": "text",
+          "title": {
+            "en": "Exclude Destinations (optional)",
+            "sv": "Uteslut destinationer (valfritt)"
+          },
+          "hint": {
+            "en": "Comma-separated destination names to hide, e.g. Vätterslund",
+            "sv": "Kommaseparerade destinationer att dölja, t.ex. Vätterslund"
+          },
+          "value": ""
+        },
+        {
+          "id": "count",
+          "type": "number",
+          "title": {
+            "en": "Number of Departures",
+            "sv": "Antal avgångar"
+          },
+          "value": 5,
+          "min": 1,
+          "max": 10
         }
       ],
       "api": {
         "getDepartures": {
-          "method": "GET",
+          "method": "POST",
           "path": "/"
         }
       },
