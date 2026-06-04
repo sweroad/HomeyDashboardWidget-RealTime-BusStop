@@ -4,7 +4,21 @@
     "sv": "Busstavla"
   },
   "height": 320,
-  "settings": [],
+  "settings": [
+    {
+      "id": "stopId",
+      "type": "text",
+      "title": {
+        "en": "Stop Area ID",
+        "sv": "Hållplats-ID"
+      },
+      "hint": {
+        "en": "Override the stop from app settings. Leave empty to use the app-level stop.",
+        "sv": "Åsidosätt hållplatsen från appinställningarna. Lämna tomt för att använda appens hållplats."
+      },
+      "value": ""
+    }
+  ],
   "api": {
     "getDepartures": {
       "method": "GET",
