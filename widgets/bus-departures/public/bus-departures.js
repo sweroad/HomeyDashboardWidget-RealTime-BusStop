@@ -94,7 +94,7 @@ function escHtml(str) {
 
 async function refresh() {
   try {
-    const data = await Homey.api('GET', '/');
+    const data = await Homey.api('GET', '/', {});
 
     if (data.error) {
       // Keep last known departures visible but show error badge
@@ -111,7 +111,11 @@ async function refresh() {
     }
   } catch (err) {
     setStatus(Homey.__('err_offline'));
-    if (lastDepartures) renderDepartures(lastDepartures);
+    if (lastDepartures) {
+      renderDepartures(lastDepartures);
+    } else {
+      renderError('network_error');
+    }
   }
 }
 
