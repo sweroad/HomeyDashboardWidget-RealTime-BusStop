@@ -14,10 +14,18 @@ module.exports = [
     method: 'GET',
     path: '/',
     async fn({ homey }) {
-      const apiKey  = homey.settings.get('apiKey')   ?? '';
-      const stopId  = homey.settings.get('stopId')   ?? '';
-      const lines   = homey.settings.get('lines')    ?? '';
-      const count   = homey.settings.get('count')    || 5;
+      homey.log('widget api GET / called');
+      let apiKey = '', stopId = '', lines = '', count = 5;
+      try {
+        apiKey = homey.settings.get('apiKey')  ?? '';
+        stopId = homey.settings.get('stopId')  ?? '';
+        lines  = homey.settings.get('lines')   ?? '';
+        count  = homey.settings.get('count')   || 5;
+        homey.log('settings read ok — stopId:', stopId, 'apiKey len:', apiKey.length);
+      } catch (err) {
+        homey.error('settings read failed:', err.message);
+        return { error: 'missing_config', departures: [], stopName: '' };
+      }
 
       if (!stopId) {
         return { error: 'missing_config', departures: [], stopName: '' };
