@@ -1,7 +1,26 @@
 'use strict';
 
+const https = require('node:https');
+
 const DEPARTURES_URL = 'https://realtime-api.trafiklab.se/v1/departures';
 const CACHE_TTL_MS   = 60 * 1000;
+
+function httpsGet(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      let body = '';
+      res.on('data', chunk => { body += chunk; });
+      res.on('end', () => {
+        resolve({
+          ok:     res.statusCode >= 200 && res.statusCode < 300,
+          status: res.statusCode,
+          json:   () => JSON.parse(body),
+        });
+      });
+      res.on('error', reject);
+    }).on('error', reject);
+  });
+}
 
 // Widget API handlers — keys must match widget.compose.json's "api" declarations.
 // Homey routes Homey.api('GET', '/') → getDepartures based on method+path.
@@ -32,9 +51,8 @@ module.exports = {
 
     let res;
     try {
-      res = await fetch(
-        `${DEPARTURES_URL}/${encodeURIComponent(stopId)}?key=${encodeURIComponent(apiKey)}`
-      );
+      const url = `${DEPARTURES_URL}/${encodeURIComponent(stopId)}?key=${encodeURIComponent(apiKey)}`;
+      res = await httpsGet(url);
     } catch (err) {
       homey.error('fetch error:', err.message);
       if (cache[cacheKey]) return applyFilters(cache[cacheKey].data, lines, count);
@@ -47,7 +65,7 @@ module.exports = {
       return { error: `api_${res.status}`, departures: [], stopName: '' };
     }
 
-    const raw  = await res.json();
+    const raw = res.json();
     const data = {
       stopName:   raw.stops?.[0]?.name ?? stopId,
       updatedAt:  raw.timestamp        ?? new Date().toISOString(),
