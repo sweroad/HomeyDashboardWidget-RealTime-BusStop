@@ -25,17 +25,14 @@ function httpsGet(url) {
 module.exports = {
 
   async getDepartures({ homey, body }) {
-    // API key stays in app settings (shared across all widget instances)
     const apiKey = homey.app.homey.settings.get('apiKey') ?? '';
-
-    // All other config comes from the widget's own settings (per instance)
     const stopId              = body?.stopId              ?? '';
     const stopName            = body?.stopName            ?? '';
     const lines               = body?.lines               ?? '';
     const excludeDestinations = body?.excludeDestinations ?? '';
     const count               = body?.count               || 5;
 
-    if (!stopId) return { error: 'missing_config', departures: [], stopName: '' };
+    if (!stopId)  return { error: 'missing_config', departures: [], stopName: '' };
     if (!apiKey) return { error: 'missing_key',    departures: [], stopName: '' };
 
     const cache    = homey.app._departuresCache;
