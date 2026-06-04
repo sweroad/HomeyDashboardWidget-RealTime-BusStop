@@ -1,7 +1,5 @@
 'use strict';
 
-/* global Homey */
-
 // ─── DOM refs ────────────────────────────────────────────────────────────────
 const $stopName    = document.getElementById('stop-name');
 const $statusBadge = document.getElementById('status-badge');
@@ -11,6 +9,17 @@ const $footer      = document.getElementById('footer');
 // ─── State ───────────────────────────────────────────────────────────────────
 let lastDepartures = null;
 let refreshTimer   = null;
+let _Homey         = null; // stored so renderDepartures can call setHeight
+
+// ─── Height ──────────────────────────────────────────────────────────────────
+const ROW_HEIGHT    = 48;
+const HEADER_HEIGHT = 36;
+const FOOTER_HEIGHT = 20;
+const PADDING       = 20;
+
+function computeHeight(rowCount) {
+  return PADDING + HEADER_HEIGHT + Math.max(rowCount, 1) * ROW_HEIGHT + FOOTER_HEIGHT;
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -46,41 +55,45 @@ function renderDepartures(data) {
   if (stopName) $stopName.textContent = stopName;
 
   if (!departures.length) {
-    $list.innerHTML = `<div id="empty">${Homey.__('no_departures')}</div>`;
+    $list.innerHTML = `<div id="empty">${_Homey.__('no_departures')}</div>`;
+    _Homey.setHeight(computeHeight(1));
     return;
   }
 
   $list.innerHTML = departures.map(dep => {
-    const displayTime  = dep.realtime ? fmtTime(dep.realtime) : fmtTime(dep.scheduled);
-    const delayText    = dep.delay > 60 ? fmtDelay(dep.delay) : null;
-    const dc           = dep.delay > 60 ? delayClass(dep.delay) : '';
-    const cancelClass  = dep.cancelled ? 'cancelled' : '';
+    const displayTime = dep.realtime ? fmtTime(dep.realtime) : fmtTime(dep.scheduled);
+    const delayText   = dep.delay > 60 ? fmtDelay(dep.delay) : null;
+    const dc          = dep.delay > 60 ? delayClass(dep.delay) : '';
+    const cancelClass = dep.cancelled ? 'cancelled' : '';
 
     return `
       <div class="departure ${cancelClass}">
         <div class="line-badge">${escHtml(dep.line)}</div>
         <div class="dest">${escHtml(dep.destination)}</div>
         <div class="time-col">
-          <span class="time-main ${dep.cancelled ? 'delay-bad' : ''}">${dep.cancelled ? Homey.__('cancelled') : escHtml(displayTime)}</span>
+          <span class="time-main ${dep.cancelled ? 'delay-bad' : ''}">${dep.cancelled ? _Homey.__('cancelled') : escHtml(displayTime)}</span>
           ${delayText ? `<span class="time-delay ${dc}">${escHtml(delayText)}</span>` : ''}
         </div>
       </div>`;
   }).join('');
 
   if (updatedAt) {
-    $footer.textContent = Homey.__('updated_at', { time: fmtTime(updatedAt) });
+    $footer.textContent = _Homey.__('updated_at', { time: fmtTime(updatedAt) });
   }
+
+  _Homey.setHeight(computeHeight(departures.length));
 }
 
 function renderError(code) {
   const msgs = {
-    missing_config: Homey.__('err_missing_config'),
-    missing_key:    Homey.__('err_missing_key'),
-    network_error:  Homey.__('err_network'),
-    api_401:        Homey.__('err_auth'),
+    missing_config: _Homey.__('err_missing_config'),
+    missing_key:    _Homey.__('err_missing_key'),
+    network_error:  _Homey.__('err_network'),
+    api_401:        _Homey.__('err_auth'),
   };
-  const msg = msgs[code] ?? Homey.__('err_generic', { code });
+  const msg = msgs[code] ?? _Homey.__('err_generic', { code });
   $list.innerHTML = `<div id="empty">${escHtml(msg)}</div>`;
+  _Homey.setHeight(computeHeight(1));
 }
 
 function escHtml(str) {
@@ -94,10 +107,10 @@ function escHtml(str) {
 
 async function refresh() {
   let settings = {};
-  try { settings = await Homey.getSettings(); } catch (_) {}
+  try { settings = await _Homey.getSettings(); } catch (_) {}
 
   try {
-    const data = await Homey.api('POST', '/', {
+    const data = await _Homey.api('POST', '/', {
       stopId:              settings.stopId              ?? '',
       stopName:            settings.stopName            ?? '',
       lines:               settings.lines               ?? '',
@@ -106,8 +119,7 @@ async function refresh() {
     });
 
     if (data.error) {
-      // Keep last known departures visible but show error badge
-      setStatus(Homey.__('err_offline'));
+      setStatus(_Homey.__('err_offline'));
       if (lastDepartures) {
         renderDepartures(lastDepartures);
       } else {
@@ -119,7 +131,7 @@ async function refresh() {
       setStatus('', false);
     }
   } catch (err) {
-    setStatus(Homey.__('err_offline'));
+    setStatus(_Homey.__('err_offline'));
     if (lastDepartures) {
       renderDepartures(lastDepartures);
     } else {
@@ -131,7 +143,17 @@ async function refresh() {
 // ─── Entry point ─────────────────────────────────────────────────────────────
 
 async function onHomeyReady(Homey) { // eslint-disable-line no-unused-vars
+  _Homey = Homey;
+
+  // Set initial height from configured count before first fetch
+  let initialCount = 5;
+  try {
+    const s = await Homey.getSettings();
+    initialCount = Math.min(Math.max(parseInt(s.count) || 5, 1), 10);
+  } catch (_) {}
+
+  Homey.ready({ height: computeHeight(initialCount) });
+
   await refresh();
   refreshTimer = setInterval(refresh, 60 * 1000);
-  Homey.ready();
 }
